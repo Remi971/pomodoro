@@ -1,0 +1,38 @@
+button.simple {
+  background-color: rgba(0, 0, 0, 0.4);
+  transition: background-color 0.3s;
+  color: white;
+  height: 2em;
+  width: 90px;
+  border: none;
+  border-radius: 3px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+button.simple:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+button.simple:focus {
+  outline: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+button.specific {
+  background-color: white;
+  color: #40514e;
+  height: 2em;
+  width: 90px;
+  border: none;
+  border-radius: 3px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 3px 0px 0px rgba(255, 255, 255, 0.8);
+}
+
+button.specific:focus {
+  outline: 0;
+}
