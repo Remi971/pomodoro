@@ -1,22 +1,64 @@
 import './App.css';
 import Btn from './components/Btn';
 import Settings from './components/Settings';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 
 function App() {
   const [sessionTime, setSessionTime] =useState(25);
   const [breakTime, setBreakTime] = useState(5);
   const [time, setTime] = useState(1500);
+  const [operate, setOperate] = useState(false);
+  const [state, setState] = useState(true);
+  const [display, setDisplay] = useState('Pomodoro Session')
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (time > 0 && operate) {
+        setTime((t) => t - 1);
+        console.log(time);
+      }
+    },1000);
+    check();
+    running()
+    return () => clearInterval(timer);
+  }
+)
+
+  const check = () => {
+    if (time === 0) {
+      setTimeout(() => {
+        if (state) {
+          setState(false);
+          setTime(breakTime * 60);
+          setOperate(true);
+        }else {
+          setState(true);
+          setTime(sessionTime * 60);
+          setOperate(true);
+        }
+      }, 1000)
+    }
+  }
+
+  const running = () => {
+    const body = document.querySelector('body');
+    if (state) {
+      body.classList.remove('on');
+      setDisplay('Pomodoro Session');
+    }else {
+      body.classList.add('on');
+      setDisplay('Break Session');
+    }
+  }
 
   const onClickSB = (e) => {
-    const body = document.querySelector('body');
     if (e.target.className === 'break simple') {
-      body.classList.add('on');
-      setTime(breakTime * 60)
+      setTime(breakTime * 60);
+      setState(false);
     }else {
-      body.classList.remove('on')
-      setTime(sessionTime * 60)
+      setTime(sessionTime * 60);
+      setState(true);
     }
   };
 
@@ -27,15 +69,9 @@ function App() {
     const btnStettings = document.querySelectorAll('.btn-settings');
     const option = document.querySelectorAll('.option');
 
-    let myVar = setInterval(() => {
-      if (time > 0 && content.innerHTML === 'Stop') {
-        setTime((time) => time - 1);
-        console.log(time)
-;      }
-    }, 1000);
-
     if (content.innerHTML === 'Start') {
       content.innerHTML = 'Stop';
+      setOperate(true);
       wrapper.classList.add('start');
       for (let i=0; i<option.length;i++) {
         option[i].classList.add('start')
@@ -47,7 +83,7 @@ function App() {
         btnStettings[i].disabled = true;
       }
     } else {
-      clearInterval(myVar);
+      setOperate(false);
       content.innerHTML = 'Start';
       wrapper.classList.remove('start');
       for (let i=0; i<option.length;i++) {
@@ -63,24 +99,45 @@ function App() {
   }
 
   const reset = () => {
-    setTime(1500);
+    setOperate(false);
+    const content = document.getElementById('start_stop');
+    const wrapper = document.getElementById('wrapper');
+    const simpleBtns = document.querySelectorAll('.simple');
+    const btnStettings = document.querySelectorAll('.btn-settings');
+    const option = document.querySelectorAll('.option');
+    content.innerHTML = 'Start';
+    wrapper.classList.remove('start');
+    for (let i=0; i<option.length;i++) {
+      option[i].classList.remove('start')
+    }
+    for (let i=0; i< simpleBtns.length; i++) {
+      simpleBtns[i].disabled = false;
+    }
+    for (let i=0; i< btnStettings.length; i++) {
+      btnStettings[i].disabled = false;
+    }
     setBreakTime(5);
     setSessionTime(25);
+    if (!state) {
+      setTime(300);
+    } else {
+      setTime(1500);
+    }
   }
 
   const settingTime = (e) => {
-    if (e.target.id === "break-increment") {
+    if (e.target.id === "break-increment" && breakTime < 60) {
       setBreakTime(breakTime + 1);
       if (document.querySelector('body').classList.value === 'on') {
         setTime((breakTime+1) * 60);
       }
-    } else if (e.target.id === "session-increment") {
+    } else if (e.target.id === "session-increment" && sessionTime < 60) {
       setSessionTime(sessionTime + 1);
       if (document.querySelector('body').classList.value !== 'on') {
         setTime((sessionTime+1) * 60);
       }
     } else if (e.target.id === "break-decrement") {
-      if (breakTime > 0) {
+      if (breakTime > 1) {
         setBreakTime(breakTime - 1);
         if (document.querySelector('body').classList.value === 'on') {
           setTime((breakTime-1) * 60);
@@ -89,7 +146,7 @@ function App() {
         console.log("Break time is too low...")
       }
     } else {
-      if (sessionTime > 0) {
+      if (sessionTime > 1) {
         setSessionTime(sessionTime - 1);
         if (document.querySelector('body').classList.value !== 'on') {
           setTime((sessionTime-1) * 60);
@@ -99,14 +156,6 @@ function App() {
       }
     }
   }
-
-// useEffect(() => {
-//     let mm = Math.floor(time / 60);
-//     let sec = time - (mm *60);
-//     if (mm < 10) { mm = '0' + mm;}
-//     if (sec < 10) { sec = '0' + sec;}
-//     return mm + ':' + sec;
-// })
 
 const timeLeft = () => {
   let mm = Math.floor(time / 60);
@@ -131,7 +180,7 @@ const timeLeft = () => {
             content='Break'
           />
         </div>
-        <h3 id='timer-label'>Session</h3>
+        <h3 id='timer-label'>{display}</h3>
         <h1 id='time-left'>{timeLeft()}</h1>
         <div className='bottom_btn'>
           <Btn
